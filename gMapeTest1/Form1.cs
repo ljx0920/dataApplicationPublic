@@ -11,6 +11,7 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 
+
 namespace gMapeTest1
 {
     public partial class Form1 : Form
@@ -56,7 +57,8 @@ namespace gMapeTest1
             #endregion
 
         }
-
+        
+        //gridviewdatas数据
         public void dataBind()
         {
             DataTable dt = new DataTable();
@@ -108,9 +110,30 @@ namespace gMapeTest1
         {
             GMapOverlay A =new GMapOverlay("A");
             GMapOverlay B = new GMapOverlay("B");
-            string path = "F:\\VsWorkspace\\gMapeTest1\\gMapeTest1\\Image\\radar1.jpg";
+
+            string path = "C:\\Users\\Administrator\\Source\\Repos\\dataApplicationPublic\\gMapeTest1\\Image\\radar1.jpg";
+            List<PointLatLng> points = new List<PointLatLng>();
+            List<PointLatLng> points1 = new List<PointLatLng>();
+            PointLatLng test = new PointLatLng(39.92244, 100.3922);
+            PointLatLng testnew = transitionToLatPoint(test, 20, 16, true);
+            points.Add(new PointLatLng(39.92244, 100.3922));
+            points.Add(new PointLatLng(39.92280, 116.4015));
+            points1.Add(new PointLatLng(39.92244, 100.3922));
+            points1.Add(testnew);
+            GMapPolygon polygon = new GMapPolygon(points, "故宫");
+            polygon.Fill = new SolidBrush(Color.FromArgb(50, Color.Red));
+            polygon.Stroke = new Pen(Color.Red, 1);
+
+            GMapPolygon polygon1 = new GMapPolygon(points1, "故宫1");
+            polygon1.Fill= new SolidBrush(Color.FromArgb(50, Color.Red)); ;
+            polygon1.Stroke = new Pen(Color.Red, 1);
+
+            A.Polygons.Add(polygon);
+            A.Polygons.Add(polygon1);
             addMarker(path, A, new PointLatLng(30, 104));
             addMarker(path, A, new PointLatLng(31, 105));
+            addMarker(path, A, new PointLatLng(39.92244, 100.3922));
+            
         }
         //图层添加方法
         private void addMarker(string RadarPath, GMapOverlay markBrand, PointLatLng point)
@@ -122,7 +145,32 @@ namespace gMapeTest1
             markBrand.Markers.Add(marker);
             this.gMapControl1.Overlays.Add(markBrand);
         }
-
+        /*
+         * @descript:坐标点加方向角，转化为两个点,支撑划线
+         * @author:ljx
+         * @input:
+         *      point:坐标点
+         *      float:方向角
+         *      float:方向角上延伸的距离
+         *      sgin:标志位,true代表输入angle为角度，否则为弧度
+         * @return:
+         *      point:坐标点按方向角延伸一定距离的点
+         */
+        PointLatLng transitionToLatPoint(PointLatLng inputPoint, float angle, float distance,bool sgin) {
+            PointLatLng result = new PointLatLng();
+            if (true.Equals(sgin))
+            {
+                double angleRad = (angle * Math.PI)/ 180;
+                result.Lat = inputPoint.Lat + Math.Cos(angleRad) * distance;
+                result.Lng = inputPoint.Lng + Math.Sin(angleRad) * distance;
+            }
+            else {
+                result.Lat = inputPoint.Lat + Math.Cos(angle) * distance;
+                result.Lng = inputPoint.Lng + Math.Sin(angle) * distance;
+            }
+            return result;
+        }
+        //坐标点加方向角，转化为两个点,支撑划线
         //class GMapMarkerImage : GMapMarker
         //{
         //    private Image image;
