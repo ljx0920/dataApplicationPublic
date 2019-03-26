@@ -47,7 +47,7 @@ namespace gMapeTest1
             #region 加载离线地图
             this.gMapControl1.MapProvider = GMapProviders.GoogleChinaMap;
             this.gMapControl1.Manager.Mode = AccessMode.CacheOnly;
-            String mapPath = Application.StartupPath + "\\GoogleChainMap.gmdb";
+            String mapPath = "F:\\VsWorkspace\\GoogleChainMap.gmdb";
             GMap.NET.GMaps.Instance.ImportFromGMDB(mapPath);
             this.gMapControl1.MinZoom = 1;   //最小比例
             this.gMapControl1.MaxZoom = 9; //最大比例
