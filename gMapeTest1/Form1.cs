@@ -3,14 +3,10 @@ using GMap.NET.MapProviders;
 using GMap.NET.WindowsForms;
 using GMap.NET.WindowsForms.Markers;
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Data;
 using System.Data.OleDb;
 using System.Drawing;
-using System.Linq;
-using System.Text;
 using System.Windows.Forms;
 
 
@@ -18,6 +14,8 @@ namespace gMapeTest1
 {
     public partial class Form1 : Form
     {
+        //变量定义
+
         //声明自适应窗口实例
         AutoSizeFormClass asc = new AutoSizeFormClass();
         public Form1()
@@ -31,24 +29,28 @@ namespace gMapeTest1
             //GMaps.Instance.Mode = AccessMode.ServerAndCache; // GMap工作模式
             //this.gMapControl1.SetPositionByKeywords("北京"); // 地图中心位置(写经纬度好用，名字不好用)
             //this.gMapControl1.DragButton = MouseButtons.Left;
-
+            /*
             #region 加载在线地图
-            //this.gMapControl1.CacheLocation = System.Windows.Forms.Application.StartupPath;//指定地图缓存存放路径
-            //this.gMapControl1.MapProvider = GMapProviders.GoogleChinaMap;//指定地图源
-            ////this.gMapControl1.MapProvider = GMapProviders.BingHybridMap;//指定地图源
+            this.gMapControl1.CacheLocation = System.Windows.Forms.Application.StartupPath;//指定地图缓存存放路径
+            this.gMapControl1.MapProvider = GMapProviders.GoogleChinaMap;//指定地图源
+            //this.gMapControl1.MapProvider = GMapProviders.BingHybridMap;//指定地图源
             //this.gMapControl1.Manager.Mode = AccessMode.ServerAndCache;//地图加载模式
-            //this.gMapControl1.MinZoom = 1;   //最小比例
-            //this.gMapControl1.MaxZoom = 23; //最大比例
-            //this.gMapControl1.Zoom = 9; //当前比例
-            //this.gMapControl1.ShowCenter = false; //不显示中心十字点
-            //this.gMapControl1.DragButton = System.Windows.Forms.MouseButtons.Left;//左键拖拽地图
-            //this.gMapControl1.Position = new PointLatLng(31, 104);
+            this.gMapControl1.Manager.Mode = AccessMode.CacheOnly;
+            this.gMapControl1.MinZoom = 1;   //最小比例
+            this.gMapControl1.MaxZoom = 23; //最大比例
+            this.gMapControl1.Zoom = 9; //当前比例
+            this.gMapControl1.ShowCenter = false; //不显示中心十字点
+            this.gMapControl1.DragButton = System.Windows.Forms.MouseButtons.Left;//左键拖拽地图
+            this.gMapControl1.Position = new PointLatLng(31, 104);
+            
             #endregion
-
+            */
             #region 加载离线地图
+            
             this.gMapControl1.MapProvider = GMapProviders.GoogleChinaMap;
             this.gMapControl1.Manager.Mode = AccessMode.CacheOnly;
-            String mapPath = "F:\\VsWorkspace\\GoogleChainMap.gmdb";
+            String mapPath = "F:\\VsWorkspace\\GoogleChainMap1.gmdb";
+            //String mapPath = "";
             GMap.NET.GMaps.Instance.ImportFromGMDB(mapPath);
             this.gMapControl1.MinZoom = 1;   //最小比例
             this.gMapControl1.MaxZoom = 9; //最大比例
@@ -56,6 +58,7 @@ namespace gMapeTest1
             this.gMapControl1.ShowCenter = false; //不显示中心十字点
             this.gMapControl1.DragButton = System.Windows.Forms.MouseButtons.Left;//左键拖拽地图
             this.gMapControl1.Position = new PointLatLng(31, 104);
+            
             #endregion
 
         }
@@ -131,6 +134,7 @@ namespace gMapeTest1
             addMarker(path, A, new PointLatLng(30, 104));
             addMarker(path, A, new PointLatLng(31, 105));
             addMarker(path, A, new PointLatLng(39.92244, 100.3922));
+            
             
         }
        
@@ -221,6 +225,7 @@ namespace gMapeTest1
 
                 using (OleDbConnection conn = new OleDbConnection(connstring))
                 {
+                    System.Console.WriteLine("ttt:"+connstring);
                     conn.Open();
                     DataTable sheetsName = conn.GetOleDbSchemaTable(OleDbSchemaGuid.Tables, new object[] { null, null, null, "Table" }); //得到所有sheet的名字
                     string firstSheetName = sheetsName.Rows[0][2].ToString(); //得到第一个sheet的名字
@@ -231,8 +236,9 @@ namespace gMapeTest1
                     return set.Tables[0];
                 }
             }
-            catch (Exception)
+            catch (Exception e)
             {
+                System.Console.WriteLine(e);
                 return null;
             }
         }
@@ -292,6 +298,11 @@ namespace gMapeTest1
                 result.Lng = inputPoint.Lng + Math.Sin(angle) * distance;
             }
             return result;
+        }
+
+        private void button3_Click(object sender, EventArgs e)
+        {
+
         }
         //坐标点加方向角，转化为两个点,支撑划线
         //class GMapMarkerImage : GMapMarker
