@@ -9,6 +9,7 @@ using System.ComponentModel;
 using System.Data;
 using System.Data.OleDb;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
@@ -169,6 +170,7 @@ namespace gMapeTest1
             {
                 string strExtension = System.IO.Path.GetExtension(path);
                 string strFileName = System.IO.Path.GetFileName(path);
+                string csvpath=System.IO.Path.GetDirectoryName(path);
                 String connstring;//数据库连接字符串
                 switch (strExtension)
                 {
@@ -177,6 +179,10 @@ namespace gMapeTest1
                         break;
                     case ".xlsx":
                         connstring = "Provider=Microsoft.ACE.OLEDB.12.0;Data Source=" + path + ";" + "Extended Properties=\"Excel 12.0;HDR=yes;IMEX=1;\"";//此连接可以操作.xls与.xlsx文件 (支持Excel2003 和 Excel2007 的连接字符串)  备注： "HDR=yes;"是说Excel文件的第一行是列名而不是数，"HDR=No;"正好与前面的相反。"IMEX=1 "如果列中的数据类型不一致，使用"IMEX=1"可必免数据类型冲突。 
+                        break;
+                    case ".csv":
+                        connstring= "Provider=Microsoft.Jet.OLEDB.4.0;Data Source=" + csvpath +"\\"+ ";Extended Properties='Text;FMT=Delimited;HDR=YES;'";
+                        
                         break;
                     default:
                         connstring = null;
@@ -196,8 +202,9 @@ namespace gMapeTest1
                     return set.Tables[0];
                 }
             }
-            catch (Exception)
+            catch (Exception e)
             {
+                System.Console.WriteLine(e);
                 return null;
             }
         }
@@ -208,32 +215,43 @@ namespace gMapeTest1
             DataTable dt1 = new DataTable();
             //详细定位
             DataTable dt2 = new DataTable();
-            
-            OpenFileDialog file = new OpenFileDialog();
-            file.Multiselect = true;
-            file.ShowDialog();
-            String[] path = file.FileNames;
-            string strFileName;
-            for (int i = 0; i < path.Length; i++)
+
+            //OpenFileDialog file = new OpenFileDialog();
+            //file.Multiselect = true;
+            //file.ShowDialog();
+            //String[] path = file.FileNames;
+
+            FolderBrowserDialog folder = new FolderBrowserDialog();
+            folder.ShowDialog();
+            string folderPath = folder.SelectedPath;
+            DirectoryInfo files = new DirectoryInfo(folderPath);
+            List<string> listFilePath = new List<string>();
+            foreach (FileInfo file in files.GetFiles())
             {
-                strFileName = System.IO.Path.GetFileNameWithoutExtension(path[i]);
+                listFilePath.Add(file.FullName);
+            }
+            string strFileName;
+            for (int i = 0; i < listFilePath.Count; i++)
+            {
+                strFileName = System.IO.Path.GetFileNameWithoutExtension(listFilePath[i]);
                 switch (strFileName)
                 {
                     case "批号信息":
                         {
-                            dt1= ReadExcelToTable(path[i]);
+                            dt1 = ReadExcelToTable(listFilePath[i]);
                         }
                         break;
                     case "详细定位":
                         {
-                            dt2 = ReadExcelToTable(path[i]);
+                            dt2 = ReadExcelToTable(listFilePath[i]);
                         }
                         break;
                     default:
                         break;
-                } 
+                }
             }
             //DataTable dt = ReadExcelToTable(path);
+
             #region 提取表中第一行作为表头
             //DataTable dt2 = new DataTable();            
             ////提取第一列作为表头
@@ -255,6 +273,7 @@ namespace gMapeTest1
             //    //dt2.ImportRow(dt.Rows[i]);
             //}
             #endregion
+
             this.dataGridView1.DataSource = dt1;
         }
 
