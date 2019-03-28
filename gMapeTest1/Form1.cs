@@ -60,39 +60,36 @@ namespace gMapeTest1
             this.gMapControl1.Position = new PointLatLng(31, 104);
             
             #endregion
-
         }
-        
-        //gridviewdatas数据
-        public void dataBind()
-        {
-            DataTable dt = new DataTable();
-            dt.Columns.Add(new DataColumn("时"));
-            dt.Columns.Add(new DataColumn("分"));
-            dt.Columns.Add(new DataColumn("秒"));
-            dt.Columns.Add(new DataColumn("RF"));
-            dt.Columns.Add(new DataColumn("PRI"));
-            dt.Columns.Add(new DataColumn("PW"));
-            DataRow dr;
-            for (int i = 0; i < 10; i++)
-            {
-                dr = dt.NewRow();
-                dr["时"] = "11";
-                dr["分"] = "12";
-                dr["秒"] = "13";
-                dr["RF"] = "5986";
-                dr["PRI"] = "1";
-                dr["PW"] = "1";
-                dt.Rows.Add(dr);
-            }
 
-            this.dataGridView1.DataSource = dt;
+        //public void dataBind()
+        //{
+        //    DataTable dt = new DataTable();
+        //    dt.Columns.Add(new DataColumn("时"));
+        //    dt.Columns.Add(new DataColumn("分"));
+        //    dt.Columns.Add(new DataColumn("秒"));
+        //    dt.Columns.Add(new DataColumn("RF"));
+        //    dt.Columns.Add(new DataColumn("PRI"));
+        //    dt.Columns.Add(new DataColumn("PW"));
+        //    DataRow dr;
+        //    for (int i = 0; i < 10; i++)
+        //    {
+        //        dr = dt.NewRow();
+        //        dr["时"] = "11";
+        //        dr["分"] = "12";
+        //        dr["秒"] = "13";
+        //        dr["RF"] = "5986";
+        //        dr["PRI"] = "1";
+        //        dr["PW"] = "1";
+        //        dt.Rows.Add(dr);
+        //    }
 
-        }
+        //    this.dataGridView1.DataSource = dt;
+
+        //}
 
         private void Form1_Load(object sender, EventArgs e)
         {
-            //this.dataBind();
             this.dataGridView1.Show();
             //2. 调用类的初始化方法，记录窗体和其控件的初始位置和大小
             asc.controllInitializeSize(this);
@@ -202,14 +199,9 @@ namespace gMapeTest1
         {
             try
             {
-                ////连接字符串
-                //// Office 07及以上版本 不能出现多余的空格 而且分号注意
-                //string connstring = "Provider=Microsoft.ACE.OLEDB.12.0;Data Source=" + path + ";Extended Properties='Excel 8.0;HDR=NO;IMEX=1';";
-                ////Office 07以下版本
-                ////string connstring = Provider=Microsoft.JET.OLEDB.4.0;Data Source=" + path + ";Extended Properties='Excel 8.0;HDR=NO;IMEX=1';";  
                 string strExtension = System.IO.Path.GetExtension(path);
                 string strFileName = System.IO.Path.GetFileName(path);
-                String connstring;
+                String connstring;//数据库连接字符串
                 switch (strExtension)
                 {
                     case ".xls":
@@ -225,7 +217,6 @@ namespace gMapeTest1
 
                 using (OleDbConnection conn = new OleDbConnection(connstring))
                 {
-                    System.Console.WriteLine("ttt:"+connstring);
                     conn.Open();
                     DataTable sheetsName = conn.GetOleDbSchemaTable(OleDbSchemaGuid.Tables, new object[] { null, null, null, "Table" }); //得到所有sheet的名字
                     string firstSheetName = sheetsName.Rows[0][2].ToString(); //得到第一个sheet的名字
@@ -233,25 +224,50 @@ namespace gMapeTest1
                     OleDbDataAdapter ada = new OleDbDataAdapter(sql, connstring);
                     DataSet set = new DataSet();
                     ada.Fill(set);
+                    conn.Close();
                     return set.Tables[0];
                 }
             }
             catch (Exception e)
             {
-                System.Console.WriteLine(e);
                 return null;
             }
         }
 
         private void button2_Click(object sender, EventArgs e)
         {
-            OpenFileDialog file = new OpenFileDialog();
-            file.ShowDialog();
-            String path = file.FileName;
-            //String path = "C:\\Users\\admin\\Desktop\\数据分析工具测试数据.xlsx";
-            DataTable dt = ReadExcelToTable(path);
-            //DataTable dt2 = new DataTable();
+            //批号信息表
+            DataTable dt1 = new DataTable();
+            //详细定位
+            DataTable dt2 = new DataTable();
             
+            OpenFileDialog file = new OpenFileDialog();
+            file.Multiselect = true;
+            file.ShowDialog();
+            String[] path = file.FileNames;
+            string strFileName;
+            for (int i = 0; i < path.Length; i++)
+            {
+                strFileName = System.IO.Path.GetFileNameWithoutExtension(path[i]);
+                switch (strFileName)
+                {
+                    case "批号信息":
+                        {
+                            dt1= ReadExcelToTable(path[i]);
+                        }
+                        break;
+                    case "详细定位":
+                        {
+                            dt2 = ReadExcelToTable(path[i]);
+                        }
+                        break;
+                    default:
+                        break;
+                } 
+            }
+            //DataTable dt = ReadExcelToTable(path);
+            #region 提取表中第一行作为表头
+            //DataTable dt2 = new DataTable();            
             ////提取第一列作为表头
             //for (int i = 0; i < dt.Columns.Count; i++)
             //{
@@ -270,7 +286,8 @@ namespace gMapeTest1
             //    //DataRow dr = dt.Rows[i];
             //    //dt2.ImportRow(dt.Rows[i]);
             //}
-            this.dataGridView1.DataSource = dt;
+            #endregion
+            this.dataGridView1.DataSource = dt1;
         }
 
 
