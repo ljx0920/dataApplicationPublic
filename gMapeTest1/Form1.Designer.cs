@@ -62,7 +62,6 @@
             this.gMapControl1.Size = new System.Drawing.Size(956, 281);
             this.gMapControl1.TabIndex = 0;
             this.gMapControl1.Zoom = 0D;
-            this.gMapControl1.Load += new System.EventHandler(this.gMapControl1_Load);
             this.gMapControl1.SizeChanged += new System.EventHandler(this.Form1_SizeChanged);
             // 
             // dataGridView1
@@ -75,6 +74,7 @@
             this.dataGridView1.Size = new System.Drawing.Size(956, 158);
             this.dataGridView1.TabIndex = 1;
             this.dataGridView1.SizeChanged += new System.EventHandler(this.Form1_SizeChanged);
+            
             // 
             // button1
             // 
@@ -118,7 +118,6 @@
             this.Controls.Add(this.gMapControl1);
             this.Name = "Form1";
             this.Text = "Form1";
-            this.Load += new System.EventHandler(this.Form1_Load);
             this.SizeChanged += new System.EventHandler(this.Form1_SizeChanged);
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).EndInit();
             this.ResumeLayout(false);
@@ -128,11 +127,19 @@
 
         #endregion
 
+        //GMap地图控件
         private GMap.NET.WindowsForms.GMapControl gMapControl1;
+        //目标数据展示控件
         private System.Windows.Forms.DataGridView dataGridView1;
+        //按钮
         private System.Windows.Forms.Button button1;
         private System.Windows.Forms.Button button2;
         private System.Windows.Forms.Button button3;
+        //坐标跳转对话框
+        private positionInForm positonForm;
+        //数据处理类
+        private excelDeal excelata;
+
     }
 }
 
