@@ -3,9 +3,7 @@ using GMap.NET.MapProviders;
 using GMap.NET.WindowsForms;
 using GMap.NET.WindowsForms.Markers;
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Data;
 using System.Data.OleDb;
 using System.Drawing;
@@ -14,36 +12,46 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 
+
 namespace gMapeTest1
 {
+    
+    public delegate void moveCenter(float lat, float lng);
     public partial class Form1 : Form
     {
+        //变量定义
+        
+
+
         //声明自适应窗口实例
         AutoSizeFormClass asc = new AutoSizeFormClass();
         public Form1()
         {
             InitializeComponent();
-        }
+            positonForm = new positionInForm();
+            excelata = new excelDeal();
 
-        private void gMapControl1_Load(object sender, EventArgs e)
-        {
-            #region 加载在线地图
-            //this.gMapControl1.CacheLocation = System.Windows.Forms.Application.StartupPath;//指定地图缓存存放路径
-            //this.gMapControl1.MapProvider = GMapProviders.GoogleChinaMap;//指定地图源
-            ////this.gMapControl1.MapProvider = GMapProviders.BingHybridMap;//指定地图源
+            /*
+             #region 加载在线地图
+             this.gMapControl1.CacheLocation = System.Windows.Forms.Application.StartupPath;//指定地图缓存存放路径
+            this.gMapControl1.MapProvider = GMapProviders.GoogleChinaMap;//指定地图源
+            //this.gMapControl1.MapProvider = GMapProviders.BingHybridMap;//指定地图源
             //this.gMapControl1.Manager.Mode = AccessMode.ServerAndCache;//地图加载模式
-            //this.gMapControl1.MinZoom = 1;   //最小比例
-            //this.gMapControl1.MaxZoom = 23; //最大比例
-            //this.gMapControl1.Zoom = 9; //当前比例
-            //this.gMapControl1.ShowCenter = false; //不显示中心十字点
-            //this.gMapControl1.DragButton = System.Windows.Forms.MouseButtons.Left;//左键拖拽地图
-            //this.gMapControl1.Position = new PointLatLng(31, 104);
-            #endregion
+            this.gMapControl1.Manager.Mode = AccessMode.CacheOnly;
+            this.gMapControl1.MinZoom = 1;   //最小比例
+            this.gMapControl1.MaxZoom = 23; //最大比例
+            this.gMapControl1.Zoom = 9; //当前比例
+            this.gMapControl1.ShowCenter = false; //不显示中心十字点
+            this.gMapControl1.DragButton = System.Windows.Forms.MouseButtons.Left;//左键拖拽地图
+            this.gMapControl1.Position = new PointLatLng(31, 104);
 
+            #endregion
+            */
             #region 加载离线地图
+
             this.gMapControl1.MapProvider = GMapProviders.GoogleChinaMap;
             this.gMapControl1.Manager.Mode = AccessMode.CacheOnly;
-            String mapPath = "F:\\VsWorkspace\\GoogleChainMap.gmdb";
+            String mapPath = "F:\\VsWorkspace\\GoogleChainMap1.gmdb";
             GMap.NET.GMaps.Instance.ImportFromGMDB(mapPath);
             this.gMapControl1.MinZoom = 1;   //最小比例
             this.gMapControl1.MaxZoom = 9; //最大比例
@@ -51,44 +59,24 @@ namespace gMapeTest1
             this.gMapControl1.ShowCenter = false; //不显示中心十字点
             this.gMapControl1.DragButton = System.Windows.Forms.MouseButtons.Left;//左键拖拽地图
             this.gMapControl1.Position = new PointLatLng(31, 104);
-            #endregion
-        }
+            positonForm.gMapControl1 = this.gMapControl1;
 
-        //public void dataBind()
-        //{
-        //    DataTable dt = new DataTable();
-        //    dt.Columns.Add(new DataColumn("时"));
-        //    dt.Columns.Add(new DataColumn("分"));
-        //    dt.Columns.Add(new DataColumn("秒"));
-        //    dt.Columns.Add(new DataColumn("RF"));
-        //    dt.Columns.Add(new DataColumn("PRI"));
-        //    dt.Columns.Add(new DataColumn("PW"));
-        //    DataRow dr;
-        //    for (int i = 0; i < 10; i++)
-        //    {
-        //        dr = dt.NewRow();
-        //        dr["时"] = "11";
-        //        dr["分"] = "12";
-        //        dr["秒"] = "13";
-        //        dr["RF"] = "5986";
-        //        dr["PRI"] = "1";
-        //        dr["PW"] = "1";
-        //        dt.Rows.Add(dr);
-        //    }
 
-        //    this.dataGridView1.DataSource = dt;
-
-        //}
-
-        private void Form1_Load(object sender, EventArgs e)
-        {
-            this.dataGridView1.Show();
-            //2. 调用类的初始化方法，记录窗体和其控件的初始位置和大小
+            // 调用类的初始化方法，记录窗体和其控件的初始位置和大小，窗口及控件的自适应
             asc.controllInitializeSize(this);
-            //标记
+            //标会雷达
             RadarMarker();
+
         }
 
+       
+        /*
+         * @atuhor jy
+         * @description:窗口大小改变时，触发控件自适应改变
+         * @input:
+         * @return:void
+         * @tip:
+         */
         //3.为窗体添加SizeChanged事件，并在其方法Form1_SizeChanged中，调用类的自适应方法，完成自适应  
         private void Form1_SizeChanged(object sender, EventArgs e)
         {
@@ -96,15 +84,54 @@ namespace gMapeTest1
         }
 
         //radar标注，添加图层
+        /*
+         * @author:jy
+         * @descript:地图中添加雷达库的标会,转化坐标后，调用addMarker
+         * @input:map(经度坐标，纬度坐标)
+         * @return:
+         * @tip:
+         */
         public void RadarMarker()
         {
-            GMapOverlay RadarOverlay =new GMapOverlay("RadarOverlay");
-            string path = "F:\\VsWorkspace\\gMapeTest1\\gMapeTest1\\Image\\radar1.jpg";
-            addMarker(path, RadarOverlay, new PointLatLng(30, 104));
-            addMarker(path, RadarOverlay, new PointLatLng(31, 105));
+            GMapOverlay A =new GMapOverlay("A");
+            GMapOverlay B = new GMapOverlay("B");
+
+            string path = "C:\\Users\\Administrator\\Source\\Repos\\dataApplicationPublic\\gMapeTest1\\Image\\radar1.jpg";
+            List<PointLatLng> points = new List<PointLatLng>();
+            List<PointLatLng> points1 = new List<PointLatLng>();
+            PointLatLng test = new PointLatLng(39.92244, 100.3922);
+            PointLatLng testnew = transitionToLatPoint(test, 20, 16, true);
+            points.Add(new PointLatLng(39.92244, 100.3922));
+            points.Add(new PointLatLng(39.92280, 116.4015));
+            points1.Add(new PointLatLng(39.92244, 100.3922));
+            points1.Add(testnew);
+            GMapPolygon polygon = new GMapPolygon(points, "故宫");
+            polygon.Fill = new SolidBrush(Color.FromArgb(50, Color.Red));
+            polygon.Stroke = new Pen(Color.Red, 1);
+
+            GMapPolygon polygon1 = new GMapPolygon(points1, "故宫1");
+            polygon1.Fill= new SolidBrush(Color.FromArgb(50, Color.Red)); ;
+            polygon1.Stroke = new Pen(Color.Red, 1);
+
+            A.Polygons.Add(polygon);
+            A.Polygons.Add(polygon1);
+            addMarker(path, A, new PointLatLng(30, 104));
+            addMarker(path, A, new PointLatLng(31, 105));
+            addMarker(path, A, new PointLatLng(39.92244, 100.3922));
+            
         }
-       
+
         //标注图层添加方法
+        /*
+         * @author:jy
+         * @descript:地图中添加图层，在地图上画点
+         * @input:
+         *      RadarPath:图标路径
+         *      markBrand:目标图层
+         *      point:标会的经纬坐标点
+         * @return:
+         * @tip:
+         */
         private void addMarker(string RadarPath, GMapOverlay markBrand, PointLatLng point)
         {
             Bitmap bitmap = null;
@@ -113,8 +140,15 @@ namespace gMapeTest1
             markBrand.Markers.Add(marker);
             this.gMapControl1.Overlays.Add(markBrand);
         }
-       
-        //划线
+
+        //划线测试函数
+        /*
+         * @author:jy
+         * @descript:地图中添加图层，在地图上画线
+         * @input:
+         * @return:
+         * @tip:
+         */
         public void Line()
         {
             GMapOverlay DirecLine = new GMapOverlay("DirecLine");
@@ -146,8 +180,18 @@ namespace gMapeTest1
             }
 
         }
-        
+
         //划线方法
+        /*
+         * @author:jy
+         * @descript:地图中添加图层，在地图上画线（两点划线）
+         * @input:
+         *         DirecLine:图层
+         *         StartP：起始点
+         *         TerminalP：终止点
+         * @return:
+         * @tip:
+         */
         public void DrawDirectionLine(GMapOverlay DirecLine, PointLatLng StartP, PointLatLng TerminalP)
         {
             List<PointLatLng> list = new List<PointLatLng>();
@@ -164,6 +208,14 @@ namespace gMapeTest1
         }
 
         //从excel导入数据
+        /*
+         * @author:jy
+         * @descript:选中文件夹路径，导入路径下的excel（excel名称写死）
+         * @input:
+         *         path:文件夹路径
+         * @return:
+         * @tip:
+         */
         public static DataTable ReadExcelToTable(string path)//excel存放的路径
         {
             try
@@ -278,78 +330,48 @@ namespace gMapeTest1
         }
 
 
-        //class GMapMarkerImage : GMapMarker
-        //{
-        //    private Image image;
-        //    public Image Image
-        //    {
-        //        get
-        //        {
-        //            return image;
-        //        }
-        //        set
-        //        {
-        //            image = value;
-        //            if (image != null)
-        //            {
-        //                this.Size = new Size(image.Width, image.Height);
-        //            }
-        //        }
-        //    }
-        //    public Pen Pen
-        //    {
-        //        get;
-        //        set;
-        //    }
-        //    public Pen OutPen
-        //    {
-        //        get;
-        //        set;
-        //    }
-        //    public GMapMarkerImage(GMap.NET.PointLatLng p, Image image) : base(p)
-        //    {
-        //        Size = new System.Drawing.Size(image.Width, image.Height);
-        //        Offset = new System.Drawing.Point(-Size.Width / 2, -Size.Height / 2);
-        //        this.image = image;
-        //        Pen = null;
-        //        OutPen = null;
-        //    }
+        /*
+         * @author:ljx
+         * @descript:坐标点加方向角，转化为两个点,支撑划线
+         * @input:
+         *      point:坐标点
+         *      float:方向角
+         *      float:方向角上延伸的距离
+         *      sgin:标志位,true代表输入angle为角度，否则为弧度
+         * @return:
+         *      point:坐标点按方向角延伸一定距离的点
+         * @tip:
+         * 
+         */
+        PointLatLng transitionToLatPoint(PointLatLng inputPoint, float angle, float distance,bool sgin) {
+            PointLatLng result = new PointLatLng();
+            if (true.Equals(sgin))
+            {
+                double angleRad = (angle * Math.PI)/ 180;
+                result.Lat = inputPoint.Lat + Math.Cos(angleRad) * distance;
+                result.Lng = inputPoint.Lng + Math.Sin(angleRad) * distance;
+            }
+            else {
+                result.Lat = inputPoint.Lat + Math.Cos(angle) * distance;
+                result.Lng = inputPoint.Lng + Math.Sin(angle) * distance;
+            }
+            return result;
+        }
+        /*
+         * @author:ljx
+         * @descript:显示坐标跳转对话框
+         * @input:
+         * @return:
+         * @tip:
+         * 
+         */
+        private void button3_Click(object sender, EventArgs e)
+        {
+ 
 
-        //    public override void OnRender(Graphics g)
-        //    {
-        //        if (image == null)
-        //            return;
-
-        //        Rectangle rect = new Rectangle(LocalPosition.X, LocalPosition.Y, Size.Width, Size.Height);
-        //        g.DrawImage(image, rect);
-
-        //        if (Pen != null)
-        //        {
-        //            g.DrawRectangle(Pen, rect);
-        //        }
-
-        //        if (OutPen != null)
-        //        {
-        //            g.DrawEllipse(OutPen, rect);
-        //        }
-        //    }
-
-        //    public override void Dispose()
-        //    {
-        //        if (Pen != null)
-        //        {
-        //            Pen.Dispose();
-        //            Pen = null;
-        //        }
-
-        //        if (OutPen != null)
-        //        {
-        //            OutPen.Dispose();
-        //            OutPen = null;
-        //        }
-
-        //        base.Dispose();
-        //    }
-        //}
+            positonForm.ShowDialog();
+            
+        }
     }
 }
+#endregion
